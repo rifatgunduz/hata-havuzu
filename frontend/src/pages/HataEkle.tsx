@@ -142,8 +142,8 @@ const HataEkle: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4, pb: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, maxHeight: 'calc(100vh - 100px)', overflow: 'auto' }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Yeni Hata Ekle
         </Typography>
@@ -247,14 +247,14 @@ const HataEkle: React.FC = () => {
 
             {gorselPreview && (
               <Grid item xs={12}>
-                <Box sx={{ textAlign: 'center' }}>
+                <Box sx={{ textAlign: 'center', mb: 2 }}>
                   <Typography variant="body2" gutterBottom>
                     Önizleme:
                   </Typography>
                   <img
                     src={gorselPreview}
                     alt="Görsel önizleme"
-                    style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px' }}
+                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', objectFit: 'contain' }}
                   />
                 </Box>
               </Grid>
