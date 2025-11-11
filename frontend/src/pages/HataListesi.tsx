@@ -56,60 +56,6 @@ const HataListesi: React.FC = () => {
   const [error, setError] = useState('');
 
   const filterHatalar = () => {
-    let filtered = [...hatalar];
-
-    if (search) {
-      filtered = filtered.filter(h =>
-        h.baslik.toLowerCase().includes(search.toLowerCase()) ||
-        h.aciklama?.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (ogrenciFilter) {
-      filtered = filtered.filter(h => h.ogrenci_id === parseInt(ogrenciFilter));
-    }
-
-    if (konuFilter) {
-      filtered = filtered.filter(h => h.konu_id === parseInt(konuFilter));
-    }
-
-    if (durumFilter) {
-      filtered = filtered.filter(h => h.durum === durumFilter);
-    }
-
-    setFilteredHatalar(filtered);
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    filterHatalar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hatalar, search, ogrenciFilter, konuFilter, durumFilter]);
-
-  const fetchData = async () => {
-    try {
-      const [hataResponse, ogrenciResponse, konuResponse] = await Promise.all([
-        hataApi.getAll(),
-        ogrenciApi.getAll(),
-        konuApi.getAll(),
-      ]);
-
-      setHatalar(hataResponse.data);
-      setFilteredHatalar(hataResponse.data);
-      setOgrenciler(ogrenciResponse.data);
-      setKonular(konuResponse.data);
-    } catch (err) {
-      setError('Veriler yüklenirken hata oluştu');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterHatalar = () => {
     let filtered = hatalar;
 
     if (search) {
@@ -136,6 +82,31 @@ const HataListesi: React.FC = () => {
     }
 
     setFilteredHatalar(filtered);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    filterHatalar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hatalar, search, ogrenciFilter, konuFilter, durumFilter]);
+
+  const fetchData = async () => {
+    try {
+      const [hataResponse, konuResponse] = await Promise.all([
+        hataApi.getAll(),
+        konuApi.getAll(),
+      ]);
+
+      setHatalar(hataResponse.data);
+      setFilteredHatalar(hataResponse.data);
+      setKonular(konuResponse.data);
+    } catch (err) {
+      setError('Veriler yüklenirken hata oluştu');
+      console.error(err);
+    }
   };
 
   const handleViewDetail = async (hataId: number) => {
