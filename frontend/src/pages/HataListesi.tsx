@@ -275,8 +275,11 @@ const HataListesi: React.FC = () => {
             color: #555;
           }
           .hata-gorsel {
-            max-width: 100%;
-            margin: 15px 0;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: 15px auto;
+            display: block;
             border: 1px solid #ddd;
             border-radius: 5px;
           }
