@@ -22,12 +22,14 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import CategoryIcon from '@mui/icons-material/Category';
 
 import Dashboard from './pages/Dashboard';
 import OgrenciKayit from './pages/OgrenciKayit';
 import OgrenciListesi from './pages/OgrenciListesi';
 import HataEkle from './pages/HataEkle';
 import HataListesi from './pages/HataListesi';
+import KonuEkle from './pages/KonuEkle';
 
 const drawerWidth = 240;
 
@@ -52,6 +54,7 @@ const menuItems: MenuItem[] = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Öğrenci Kayıt', icon: <PersonAddIcon />, path: '/ogrenci-kayit' },
   { text: 'Öğrenci Listesi', icon: <PeopleIcon />, path: '/ogrenci-listesi' },
+  { text: 'Konu Ekle', icon: <CategoryIcon />, path: '/konu-ekle' },
   { text: 'Hata Ekle', icon: <AddCircleIcon />, path: '/hata-ekle' },
   { text: 'Hata Listesi', icon: <ListAltIcon />, path: '/hata-listesi' },
 ];
@@ -160,6 +163,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/ogrenci-kayit" element={<OgrenciKayit />} />
               <Route path="/ogrenci-listesi" element={<OgrenciListesi />} />
+              <Route path="/konu-ekle" element={<KonuEkle />} />
               <Route path="/hata-ekle" element={<HataEkle />} />
               <Route path="/hata-listesi" element={<HataListesi />} />
             </Routes>
