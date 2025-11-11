@@ -81,6 +81,16 @@ export const konuApi = {
     if (error) throw error;
     return { data };
   },
+
+  delete: async (id: number) => {
+    const { error } = await supabase
+      .from('konular')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { data: { message: 'Ders/Konu başarıyla silindi' } };
+  },
 };
 
 // Storage helper - Dosya upload

@@ -13,8 +13,8 @@ import AddIcon from '@mui/icons-material/Add';
 import { konuApi } from '../services/api';
 
 const KonuEkle: React.FC = () => {
-  const [kategori, setKategori] = useState('');
-  const [altKonu, setAltKonu] = useState('');
+  const [ders, setDers] = useState('');
+  const [konu, setKonu] = useState('');
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ const KonuEkle: React.FC = () => {
     setLoading(true);
 
     // Validasyon
-    if (!kategori || !altKonu) {
+    if (!ders || !konu) {
       setError('Tüm alanlar zorunludur');
       setLoading(false);
       return;
@@ -34,18 +34,18 @@ const KonuEkle: React.FC = () => {
 
     try {
       await konuApi.create({
-        kategori: kategori.trim(),
-        alt_konu: altKonu.trim(),
+        kategori: ders.trim(),
+        alt_konu: konu.trim(),
       });
 
       setSuccess(true);
-      setKategori('');
-      setAltKonu('');
+      setDers('');
+      setKonu('');
 
       // 3 saniye sonra başarı mesajını kaldır
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Konu eklenirken bir hata oluştu');
+      setError(err.response?.data?.error || 'Ders/Konu eklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -55,12 +55,12 @@ const KonuEkle: React.FC = () => {
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
-          Yeni Konu Ekle
+          Yeni Ders/Konu Ekle
         </Typography>
 
         {success && (
           <Alert severity="success" sx={{ mb: 2 }}>
-            Konu başarıyla eklendi!
+            Ders/Konu başarıyla eklendi!
           </Alert>
         )}
 
@@ -76,13 +76,13 @@ const KonuEkle: React.FC = () => {
               <TextField
                 required
                 fullWidth
-                label="Kategori"
-                name="kategori"
-                value={kategori}
-                onChange={(e) => setKategori(e.target.value)}
+                label="Ders"
+                name="ders"
+                value={ders}
+                onChange={(e) => setDers(e.target.value)}
                 disabled={loading}
                 placeholder="Örn: Matematik, Fizik, Kimya"
-                helperText="Ana konu başlığı"
+                helperText="Ders adı"
               />
             </Grid>
 
@@ -90,13 +90,13 @@ const KonuEkle: React.FC = () => {
               <TextField
                 required
                 fullWidth
-                label="Alt Konu"
-                name="alt_konu"
-                value={altKonu}
-                onChange={(e) => setAltKonu(e.target.value)}
+                label="Konu"
+                name="konu"
+                value={konu}
+                onChange={(e) => setKonu(e.target.value)}
                 disabled={loading}
                 placeholder="Örn: Türev, Limit, İntegral"
-                helperText="Alt konu başlığı"
+                helperText="Konu başlığı"
               />
             </Grid>
 
@@ -109,7 +109,7 @@ const KonuEkle: React.FC = () => {
                 startIcon={<AddIcon />}
                 disabled={loading}
               >
-                {loading ? 'Ekleniyor...' : 'Konu Ekle'}
+                {loading ? 'Ekleniyor...' : 'Ders/Konu Ekle'}
               </Button>
             </Grid>
           </Grid>

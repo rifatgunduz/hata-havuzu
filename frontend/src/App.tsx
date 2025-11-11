@@ -30,6 +30,7 @@ import OgrenciListesi from './pages/OgrenciListesi';
 import HataEkle from './pages/HataEkle';
 import HataListesi from './pages/HataListesi';
 import KonuEkle from './pages/KonuEkle';
+import KonuListesi from './pages/KonuListesi';
 
 const drawerWidth = 240;
 
@@ -54,7 +55,8 @@ const menuItems: MenuItem[] = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Öğrenci Kayıt', icon: <PersonAddIcon />, path: '/ogrenci-kayit' },
   { text: 'Öğrenci Listesi', icon: <PeopleIcon />, path: '/ogrenci-listesi' },
-  { text: 'Konu Ekle', icon: <CategoryIcon />, path: '/konu-ekle' },
+  { text: 'Ders/Konu Ekle', icon: <CategoryIcon />, path: '/konu-ekle' },
+  { text: 'Ders/Konu Listesi', icon: <ListAltIcon />, path: '/konu-listesi' },
   { text: 'Hata Ekle', icon: <AddCircleIcon />, path: '/hata-ekle' },
   { text: 'Hata Listesi', icon: <ListAltIcon />, path: '/hata-listesi' },
 ];
@@ -164,6 +166,7 @@ function App() {
               <Route path="/ogrenci-kayit" element={<OgrenciKayit />} />
               <Route path="/ogrenci-listesi" element={<OgrenciListesi />} />
               <Route path="/konu-ekle" element={<KonuEkle />} />
+              <Route path="/konu-listesi" element={<KonuListesi />} />
               <Route path="/hata-ekle" element={<HataEkle />} />
               <Route path="/hata-listesi" element={<HataListesi />} />
             </Routes>
