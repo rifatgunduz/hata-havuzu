@@ -60,10 +60,8 @@ const OgrenciListesi: React.FC = () => {
     try {
       const response = await ogrenciApi.getAll();
       setOgrenciler(response.data);
-      setLoading(false);
     } catch (err) {
       setError('Öğrenciler yüklenirken hata oluştu');
-      setLoading(false);
     }
   };
 
@@ -81,7 +79,6 @@ const OgrenciListesi: React.FC = () => {
       };
 
       setOgrenciDetay(detay);
-      setSelectedOgrenci(ogrenci);
       setDetailDialogOpen(true);
     } catch (err) {
       console.error('Detay alınırken hata:', err);
