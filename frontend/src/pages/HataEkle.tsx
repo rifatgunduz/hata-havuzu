@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   Paper,
@@ -13,8 +13,15 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CropIcon from '@mui/icons-material/Crop';
+import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 import { ogrenciApi, konuApi, hataApi } from '../services/api';
 
 interface HataFormData {
@@ -41,6 +48,13 @@ const HataEkle: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Kırpma için state'ler
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [originalImage, setOriginalImage] = useState<string>('');
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     fetchOgrenciler();
@@ -82,15 +96,75 @@ const HataEkle: React.FC = () => {
   const handleGorselChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setGorsel(file);
+
+      // Önce orijinal görseli göster, kırpmaya hazırla
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setOriginalImage(reader.result as string);
+        setCropDialogOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const getCroppedImg = async (): Promise<File | null> => {
+    if (!completedCrop || !imgRef.current) return null;
+
+    const canvas = document.createElement('canvas');
+    const image = imgRef.current;
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+
+    canvas.width = completedCrop.width;
+    canvas.height = completedCrop.height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return null;
+
+    ctx.drawImage(
+      image,
+      completedCrop.x * scaleX,
+      completedCrop.y * scaleY,
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY,
+      0,
+      0,
+      completedCrop.width,
+      completedCrop.height
+    );
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          resolve(null);
+          return;
+        }
+        const file = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
+        resolve(file);
+      }, 'image/jpeg');
+    });
+  };
+
+  const handleCropComplete = async () => {
+    const croppedFile = await getCroppedImg();
+    if (croppedFile) {
+      setGorsel(croppedFile);
 
       // Önizleme oluştur
       const reader = new FileReader();
       reader.onloadend = () => {
         setGorselPreview(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(croppedFile);
     }
+    setCropDialogOpen(false);
+  };
+
+  const handleCropCancel = () => {
+    setCropDialogOpen(false);
+    setOriginalImage('');
+    setCrop(undefined);
+    setCompletedCrop(undefined);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -291,6 +365,50 @@ const HataEkle: React.FC = () => {
           </Grid>
         </Box>
       </Paper>
+
+      {/* Kırpma Dialog */}
+      <Dialog
+        open={cropDialogOpen}
+        onClose={handleCropCancel}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CropIcon />
+            <Typography variant="h6">Görseli Kırp</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            {originalImage && (
+              <ReactCrop
+                crop={crop}
+                onChange={(c) => setCrop(c)}
+                onComplete={(c) => setCompletedCrop(c)}
+                aspect={undefined}
+              >
+                <img
+                  ref={imgRef}
+                  src={originalImage}
+                  alt="Kırpılacak görsel"
+                  style={{ maxWidth: '100%' }}
+                />
+              </ReactCrop>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCropCancel}>İptal</Button>
+          <Button
+            onClick={handleCropComplete}
+            variant="contained"
+            disabled={!completedCrop}
+          >
+            Kırpmayı Onayla
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
