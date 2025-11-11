@@ -3,7 +3,6 @@ import {
   Container,
   Paper,
   Typography,
-  Box,
   Table,
   TableBody,
   TableCell,
