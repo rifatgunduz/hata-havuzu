@@ -27,7 +27,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { hataApi, ogrenciApi, konuApi } from '../services/api';
+import { hataApi, konuApi } from '../services/api';
 
 interface Hata {
   id: number;
