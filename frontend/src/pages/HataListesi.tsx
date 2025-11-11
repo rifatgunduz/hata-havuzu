@@ -28,6 +28,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ClearIcon from '@mui/icons-material/Clear';
+import PrintIcon from '@mui/icons-material/Print';
 import { hataApi, konuApi, ogrenciApi } from '../services/api';
 
 interface Hata {
@@ -196,6 +197,157 @@ const HataListesi: React.FC = () => {
     setBitisTarihi('');
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Hata Listesi - Yazdır</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+          }
+          h1 {
+            text-align: center;
+            color: #1976d2;
+            margin-bottom: 30px;
+          }
+          .filter-info {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+          }
+          .filter-info p {
+            margin: 5px 0;
+          }
+          .hata-item {
+            page-break-inside: avoid;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+          }
+          .hata-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 10px;
+          }
+          .hata-baslik {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+          }
+          .hata-durum {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 12px;
+          }
+          .durum-cozuldu {
+            background-color: #4caf50;
+            color: white;
+          }
+          .durum-inceleniyor {
+            background-color: #ff9800;
+            color: white;
+          }
+          .durum-cozulmedi {
+            background-color: #f44336;
+            color: white;
+          }
+          .hata-info {
+            margin: 10px 0;
+          }
+          .hata-info p {
+            margin: 5px 0;
+          }
+          .label {
+            font-weight: bold;
+            color: #555;
+          }
+          .hata-gorsel {
+            max-width: 100%;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+          }
+          .toplam {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 5px;
+          }
+          @media print {
+            .hata-item {
+              page-break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Hata Havuzu - Filtrelenmiş Hata Listesi</h1>
+
+        <div class="filter-info">
+          <p><strong>Rapor Tarihi:</strong> ${new Date().toLocaleString('tr-TR')}</p>
+          ${search ? `<p><strong>Arama:</strong> ${search}</p>` : ''}
+          ${ogrenciFilter ? `<p><strong>Öğrenci:</strong> ${ogrenciFilter}</p>` : ''}
+          ${dersFilter ? `<p><strong>Ders:</strong> ${dersFilter}</p>` : ''}
+          ${konuFilter ? `<p><strong>Konu:</strong> ${konuFilter}</p>` : ''}
+          ${durumFilter ? `<p><strong>Durum:</strong> ${durumFilter}</p>` : ''}
+          ${baslangicTarihi ? `<p><strong>Başlangıç Tarihi:</strong> ${new Date(baslangicTarihi).toLocaleDateString('tr-TR')}</p>` : ''}
+          ${bitisTarihi ? `<p><strong>Bitiş Tarihi:</strong> ${new Date(bitisTarihi).toLocaleDateString('tr-TR')}</p>` : ''}
+        </div>
+
+        <div class="toplam">
+          Toplam ${filteredHatalar.length} hata bulundu
+        </div>
+
+        ${filteredHatalar.map((hata) => `
+          <div class="hata-item">
+            <div class="hata-header">
+              <div class="hata-baslik">${hata.baslik}</div>
+              <div class="hata-durum durum-${hata.durum === 'çözüldü' ? 'cozuldu' : hata.durum === 'inceleniyor' ? 'inceleniyor' : 'cozulmedi'}">
+                ${hata.durum.toUpperCase()}
+              </div>
+            </div>
+
+            <div class="hata-info">
+              <p><span class="label">Öğrenci:</span> ${hata.ogrenci_ad} ${hata.ogrenci_soyad}</p>
+              ${hata.kategori ? `<p><span class="label">Ders-Konu:</span> ${hata.kategori} - ${hata.alt_konu}</p>` : ''}
+              <p><span class="label">Tarih:</span> ${new Date(hata.olusturma_tarihi).toLocaleString('tr-TR')}</p>
+              ${hata.aciklama ? `<p><span class="label">Açıklama:</span> ${hata.aciklama}</p>` : ''}
+            </div>
+
+            ${hata.gorsel_url ? `<img src="${hata.gorsel_url}" alt="${hata.baslik}" class="hata-gorsel" />` : ''}
+          </div>
+        `).join('')}
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    // Görsellerin yüklenmesini bekle
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    };
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -339,10 +491,21 @@ const HataListesi: React.FC = () => {
         </Grid>
       </Paper>
 
-      {/* Sonuç Sayısı */}
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        {filteredHatalar.length} hata bulundu
-      </Typography>
+      {/* Sonuç Sayısı ve Yazdırma Butonu */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="body2">
+          {filteredHatalar.length} hata bulundu
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<PrintIcon />}
+          onClick={handlePrint}
+          disabled={filteredHatalar.length === 0}
+        >
+          Yazdır
+        </Button>
+      </Box>
 
       {/* Hata Kartları */}
       <Grid container spacing={3}>
