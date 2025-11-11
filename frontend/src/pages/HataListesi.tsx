@@ -228,11 +228,17 @@ const HataListesi: React.FC = () => {
           }
           .hata-item {
             page-break-inside: avoid;
+            page-break-after: always;
             border: 1px solid #ddd;
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 5px;
             background-color: #fff;
+            max-height: 90vh;
+            overflow: hidden;
+          }
+          .hata-item:last-child {
+            page-break-after: auto;
           }
           .hata-header {
             display: flex;
@@ -277,11 +283,13 @@ const HataListesi: React.FC = () => {
           .hata-gorsel {
             width: 100%;
             max-width: 800px;
+            max-height: 500px;
             height: auto;
             margin: 15px auto;
             display: block;
             border: 1px solid #ddd;
             border-radius: 5px;
+            object-fit: contain;
           }
           .toplam {
             text-align: center;
