@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CropIcon from '@mui/icons-material/Crop';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { ogrenciApi, konuApi, hataApi } from '../services/api';
@@ -162,6 +163,14 @@ const HataEkle: React.FC = () => {
 
   const handleCropCancel = () => {
     setCropDialogOpen(false);
+    setOriginalImage('');
+    setCrop(undefined);
+    setCompletedCrop(undefined);
+  };
+
+  const handleRemoveImage = () => {
+    setGorsel(null);
+    setGorselPreview('');
     setOriginalImage('');
     setCrop(undefined);
     setCompletedCrop(undefined);
@@ -322,9 +331,20 @@ const HataEkle: React.FC = () => {
             {gorselPreview && (
               <Grid item xs={12}>
                 <Box sx={{ textAlign: 'center', mb: 2 }}>
-                  <Typography variant="body2" gutterBottom>
-                    Önizleme:
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2">
+                      Önizleme:
+                    </Typography>
+                    <Button
+                      size="small"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleRemoveImage}
+                      disabled={loading}
+                    >
+                      Görseli Kaldır
+                    </Button>
+                  </Box>
                   <img
                     src={gorselPreview}
                     alt="Görsel önizleme"
