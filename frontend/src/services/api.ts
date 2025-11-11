@@ -88,7 +88,7 @@ const uploadFile = async (file: File, folder: string = 'hatalar') => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('hata-gorselleri')
     .upload(fileName, file, {
       cacheControl: '3600',

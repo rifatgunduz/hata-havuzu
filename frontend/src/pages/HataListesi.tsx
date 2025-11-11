@@ -46,7 +46,6 @@ interface Hata {
 const HataListesi: React.FC = () => {
   const [hatalar, setHatalar] = useState<Hata[]>([]);
   const [filteredHatalar, setFilteredHatalar] = useState<Hata[]>([]);
-  const [ogrenciler, setOgrenciler] = useState<any[]>([]);
   const [konular, setKonular] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [ogrenciFilter, setOgrenciFilter] = useState('');
@@ -54,8 +53,32 @@ const HataListesi: React.FC = () => {
   const [durumFilter, setDurumFilter] = useState('');
   const [selectedHata, setSelectedHata] = useState<Hata | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const filterHatalar = () => {
+    let filtered = [...hatalar];
+
+    if (search) {
+      filtered = filtered.filter(h =>
+        h.baslik.toLowerCase().includes(search.toLowerCase()) ||
+        h.aciklama?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (ogrenciFilter) {
+      filtered = filtered.filter(h => h.ogrenci_id === parseInt(ogrenciFilter));
+    }
+
+    if (konuFilter) {
+      filtered = filtered.filter(h => h.konu_id === parseInt(konuFilter));
+    }
+
+    if (durumFilter) {
+      filtered = filtered.filter(h => h.durum === durumFilter);
+    }
+
+    setFilteredHatalar(filtered);
+  };
 
   useEffect(() => {
     fetchData();
@@ -63,6 +86,7 @@ const HataListesi: React.FC = () => {
 
   useEffect(() => {
     filterHatalar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hatalar, search, ogrenciFilter, konuFilter, durumFilter]);
 
   const fetchData = async () => {

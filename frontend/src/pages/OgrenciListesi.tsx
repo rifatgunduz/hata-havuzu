@@ -19,7 +19,6 @@ import {
   TextField,
   Grid,
   Alert,
-  Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -46,12 +45,10 @@ interface OgrenciDetay {
 
 const OgrenciListesi: React.FC = () => {
   const [ogrenciler, setOgrenciler] = useState<Ogrenci[]>([]);
-  const [selectedOgrenci, setSelectedOgrenci] = useState<Ogrenci | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [ogrenciDetay, setOgrenciDetay] = useState<OgrenciDetay | null>(null);
   const [editFormData, setEditFormData] = useState<Ogrenci | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
