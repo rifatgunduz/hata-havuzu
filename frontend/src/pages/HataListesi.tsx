@@ -27,6 +27,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ClearIcon from '@mui/icons-material/Clear';
 import { hataApi, konuApi, ogrenciApi } from '../services/api';
 
 interface Hata {
@@ -185,6 +186,16 @@ const HataListesi: React.FC = () => {
     }
   };
 
+  const handleClearFilters = () => {
+    setSearch('');
+    setOgrenciFilter('');
+    setDersFilter('');
+    setKonuFilter('');
+    setDurumFilter('');
+    setBaslangicTarihi('');
+    setBitisTarihi('');
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -311,6 +322,19 @@ const HataListesi: React.FC = () => {
                 shrink: true,
               }}
             />
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="secondary"
+              startIcon={<ClearIcon />}
+              onClick={handleClearFilters}
+              sx={{ height: '56px' }}
+            >
+              Filtreleri Temizle
+            </Button>
           </Grid>
         </Grid>
       </Paper>
