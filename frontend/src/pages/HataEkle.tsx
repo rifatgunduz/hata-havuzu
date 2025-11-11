@@ -266,13 +266,13 @@ const HataEkle: React.FC = () => {
 
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <InputLabel>Konu</InputLabel>
+                <InputLabel>Ders-Konu</InputLabel>
                 <Select
                   name="konu_id"
                   value={formData.konu_id}
                   onChange={handleSelectChange}
                   disabled={loading}
-                  label="Konu"
+                  label="Ders-Konu"
                 >
                   {konular.map((konu) => (
                     <MenuItem key={konu.id} value={konu.id}>

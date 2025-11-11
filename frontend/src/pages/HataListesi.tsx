@@ -27,7 +27,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { hataApi, konuApi } from '../services/api';
+import { hataApi, konuApi, ogrenciApi } from '../services/api';
 
 interface Hata {
   id: number;
@@ -46,11 +46,15 @@ interface Hata {
 const HataListesi: React.FC = () => {
   const [hatalar, setHatalar] = useState<Hata[]>([]);
   const [filteredHatalar, setFilteredHatalar] = useState<Hata[]>([]);
+  const [ogrenciler, setOgrenciler] = useState<any[]>([]);
   const [konular, setKonular] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [ogrenciFilter, setOgrenciFilter] = useState('');
+  const [dersFilter, setDersFilter] = useState('');
   const [konuFilter, setKonuFilter] = useState('');
   const [durumFilter, setDurumFilter] = useState('');
+  const [baslangicTarihi, setBaslangicTarihi] = useState('');
+  const [bitisTarihi, setBitisTarihi] = useState('');
   const [selectedHata, setSelectedHata] = useState<Hata | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [error, setError] = useState('');
@@ -73,12 +77,33 @@ const HataListesi: React.FC = () => {
       );
     }
 
+    if (dersFilter) {
+      filtered = filtered.filter((hata) => hata.kategori === dersFilter);
+    }
+
     if (konuFilter) {
-      filtered = filtered.filter((hata) => hata.kategori === konuFilter);
+      filtered = filtered.filter((hata) => hata.alt_konu === konuFilter);
     }
 
     if (durumFilter) {
       filtered = filtered.filter((hata) => hata.durum === durumFilter);
+    }
+
+    if (baslangicTarihi) {
+      filtered = filtered.filter((hata) => {
+        const hataTarihi = new Date(hata.olusturma_tarihi);
+        const baslangic = new Date(baslangicTarihi);
+        return hataTarihi >= baslangic;
+      });
+    }
+
+    if (bitisTarihi) {
+      filtered = filtered.filter((hata) => {
+        const hataTarihi = new Date(hata.olusturma_tarihi);
+        const bitis = new Date(bitisTarihi);
+        bitis.setHours(23, 59, 59, 999); // Günün sonuna kadar
+        return hataTarihi <= bitis;
+      });
     }
 
     setFilteredHatalar(filtered);
@@ -91,17 +116,19 @@ const HataListesi: React.FC = () => {
   useEffect(() => {
     filterHatalar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hatalar, search, ogrenciFilter, konuFilter, durumFilter]);
+  }, [hatalar, search, ogrenciFilter, dersFilter, konuFilter, durumFilter, baslangicTarihi, bitisTarihi]);
 
   const fetchData = async () => {
     try {
-      const [hataResponse, konuResponse] = await Promise.all([
+      const [hataResponse, ogrenciResponse, konuResponse] = await Promise.all([
         hataApi.getAll(),
+        ogrenciApi.getAll(),
         konuApi.getAll(),
       ]);
 
       setHatalar(hataResponse.data);
       setFilteredHatalar(hataResponse.data);
+      setOgrenciler(ogrenciResponse.data);
       setKonular(konuResponse.data);
     } catch (err) {
       setError('Veriler yüklenirken hata oluştu');
@@ -187,13 +214,39 @@ const HataListesi: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              fullWidth
-              label="Öğrenci"
-              placeholder="Öğrenci adı..."
-              value={ogrenciFilter}
-              onChange={(e) => setOgrenciFilter(e.target.value)}
-            />
+            <FormControl fullWidth>
+              <InputLabel>Öğrenci</InputLabel>
+              <Select
+                value={ogrenciFilter}
+                onChange={(e: SelectChangeEvent) => setOgrenciFilter(e.target.value)}
+                label="Öğrenci"
+              >
+                <MenuItem value="">Tümü</MenuItem>
+                {ogrenciler.map((ogrenci) => (
+                  <MenuItem key={ogrenci.id} value={`${ogrenci.ad} ${ogrenci.soyad}`}>
+                    {ogrenci.ad} {ogrenci.soyad}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl fullWidth>
+              <InputLabel>Ders</InputLabel>
+              <Select
+                value={dersFilter}
+                onChange={(e: SelectChangeEvent) => setDersFilter(e.target.value)}
+                label="Ders"
+              >
+                <MenuItem value="">Tümü</MenuItem>
+                {Array.from(new Set(konular.map((k) => k.kategori))).map((kategori) => (
+                  <MenuItem key={kategori} value={kategori}>
+                    {kategori}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
@@ -205,9 +258,13 @@ const HataListesi: React.FC = () => {
                 label="Konu"
               >
                 <MenuItem value="">Tümü</MenuItem>
-                {Array.from(new Set(konular.map((k) => k.kategori))).map((kategori) => (
-                  <MenuItem key={kategori} value={kategori}>
-                    {kategori}
+                {Array.from(new Set(
+                  konular
+                    .filter((k) => !dersFilter || k.kategori === dersFilter)
+                    .map((k) => k.alt_konu)
+                )).map((altKonu) => (
+                  <MenuItem key={altKonu} value={altKonu}>
+                    {altKonu}
                   </MenuItem>
                 ))}
               </Select>
@@ -228,6 +285,32 @@ const HataListesi: React.FC = () => {
                 <MenuItem value="çözüldü">Çözüldü</MenuItem>
               </Select>
             </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              fullWidth
+              label="Başlangıç Tarihi"
+              type="date"
+              value={baslangicTarihi}
+              onChange={(e) => setBaslangicTarihi(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              fullWidth
+              label="Bitiş Tarihi"
+              type="date"
+              value={bitisTarihi}
+              onChange={(e) => setBitisTarihi(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
           </Grid>
         </Grid>
       </Paper>
