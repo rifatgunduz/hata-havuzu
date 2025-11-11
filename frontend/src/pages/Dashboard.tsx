@@ -7,12 +7,17 @@ import {
   Box,
   Card,
   CardContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
-import { istatistikApi } from '../services/api';
+import { istatistikApi, ogrenciApi, hataApi } from '../services/api';
 
 interface Istatistikler {
   toplam_ogrenci: number;
@@ -28,10 +33,24 @@ const Dashboard: React.FC = () => {
     cozulmus_hata: 0,
     cozulmemis_hata: 0,
   });
+  const [ogrenciler, setOgrenciler] = useState<any[]>([]);
+  const [selectedOgrenci, setSelectedOgrenci] = useState<string>('');
+  const [ogrenciHatalari, setOgrenciHatalari] = useState({
+    toplam: 0,
+    cozulmus: 0,
+    cozulmemis: 0,
+  });
 
   useEffect(() => {
     fetchIstatistikler();
+    fetchOgrenciler();
   }, []);
+
+  useEffect(() => {
+    if (selectedOgrenci) {
+      fetchOgrenciHatalari(parseInt(selectedOgrenci));
+    }
+  }, [selectedOgrenci]);
 
   const fetchIstatistikler = async () => {
     try {
@@ -40,6 +59,34 @@ const Dashboard: React.FC = () => {
     } catch (err) {
       console.error('İstatistikler yüklenirken hata:', err);
     }
+  };
+
+  const fetchOgrenciler = async () => {
+    try {
+      const response = await ogrenciApi.getAll();
+      setOgrenciler(response.data);
+    } catch (err) {
+      console.error('Öğrenciler yüklenirken hata:', err);
+    }
+  };
+
+  const fetchOgrenciHatalari = async (ogrenciId: number) => {
+    try {
+      const response = await hataApi.getAll({ ogrenci_id: ogrenciId });
+      const hatalar = response.data;
+
+      setOgrenciHatalari({
+        toplam: hatalar.length,
+        cozulmus: hatalar.filter((h: any) => h.durum === 'çözüldü').length,
+        cozulmemis: hatalar.filter((h: any) => h.durum === 'çözülmedi').length,
+      });
+    } catch (err) {
+      console.error('Öğrenci hataları yüklenirken hata:', err);
+    }
+  };
+
+  const handleOgrenciChange = (event: SelectChangeEvent) => {
+    setSelectedOgrenci(event.target.value);
   };
 
   const cozumOrani =
@@ -82,6 +129,27 @@ const Dashboard: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         Hata Havuzu - Dashboard
       </Typography>
+
+      {/* Öğrenci Seçimi */}
+      <Box sx={{ mb: 3 }}>
+        <FormControl fullWidth sx={{ maxWidth: 400 }}>
+          <InputLabel>Öğrenci Seç (Opsiyonel)</InputLabel>
+          <Select
+            value={selectedOgrenci}
+            onChange={handleOgrenciChange}
+            label="Öğrenci Seç (Opsiyonel)"
+          >
+            <MenuItem value="">
+              <em>Tüm Öğrenciler</em>
+            </MenuItem>
+            {ogrenciler.map((ogrenci) => (
+              <MenuItem key={ogrenci.id} value={ogrenci.id}>
+                {ogrenci.ad} {ogrenci.soyad}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       <Grid container spacing={3}>
         {/* İstatistik Kartları */}
@@ -137,6 +205,46 @@ const Dashboard: React.FC = () => {
             </Box>
           </Paper>
         </Grid>
+
+        {/* Öğrenci Bazlı İstatistikler */}
+        {selectedOgrenci && (
+          <>
+            <Grid item xs={12}>
+              <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 2 }}>
+                Seçili Öğrenci İstatistikleri -{' '}
+                {ogrenciler.find((o) => o.id === parseInt(selectedOgrenci))?.ad}{' '}
+                {ogrenciler.find((o) => o.id === parseInt(selectedOgrenci))?.soyad}
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <StatCard
+                title="Toplam Hata"
+                value={ogrenciHatalari.toplam}
+                icon={<ErrorIcon sx={{ fontSize: 30, color: 'warning.main' }} />}
+                color="warning"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <StatCard
+                title="Çözülen Hatalar"
+                value={ogrenciHatalari.cozulmus}
+                icon={<CheckCircleIcon sx={{ fontSize: 30, color: 'success.main' }} />}
+                color="success"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <StatCard
+                title="Bekleyen Hatalar"
+                value={ogrenciHatalari.cozulmemis}
+                icon={<PendingIcon sx={{ fontSize: 30, color: 'error.main' }} />}
+                color="error"
+              />
+            </Grid>
+          </>
+        )}
 
         {/* Hoşgeldin Mesajı */}
         <Grid item xs={12}>
